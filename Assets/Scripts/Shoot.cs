@@ -12,6 +12,9 @@ public class Shoot : MonoBehaviour {
 
     [SerializeField]
     private GameManager gm;
+
+    [SerializeField]
+    private GameObject explosion;
 	
 	// Update is called once per frame
 	void Update () {
@@ -78,6 +81,7 @@ public class Shoot : MonoBehaviour {
         if(other.gameObject.tag == "EnemyBullet")
         {
             gm.Loose();
+            Instantiate(explosion, transform.position, transform.rotation);
             Destroy(gameObject);
             Destroy(other.gameObject);
         }

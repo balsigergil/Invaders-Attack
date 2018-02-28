@@ -18,11 +18,16 @@ public class Enemy : MonoBehaviour {
     float timer = 0;
 
     [SerializeField]
+    private GameObject explosion;
+
+    [SerializeField]
     private Bullet bulletPrefab;
 
     private Vector3 borderRight;
     private Vector3 borderLeft;
     private float newPosY = 0.0f;
+
+    private bool hasTouchEdgeOfScreen = false;
 
     // Use this for initialization
     void Start()
@@ -39,14 +44,20 @@ public class Enemy : MonoBehaviour {
     { 
         if (transform.position.x >= borderRight.x)
         {
-            speed = -speed;
-            StepDown();
+            speed = -Mathf.Abs(speed);
+            hasTouchEdgeOfScreen = true;
         }
 
         if (transform.position.x <= borderLeft.x)
         {
-            speed = -speed;
+            speed = Mathf.Abs(speed);
+            hasTouchEdgeOfScreen = true;
+        }
+
+        if(transform.position.x >= borderLeft.x && transform.position.x <= borderRight.x && hasTouchEdgeOfScreen)
+        {
             StepDown();
+            hasTouchEdgeOfScreen = false;
         }
 
         transform.position = new Vector3(transform.position.x + speed * Time.deltaTime, Mathf.Lerp(transform.position.y, newPosY, 0.06f));
@@ -71,14 +82,23 @@ public class Enemy : MonoBehaviour {
 
         if (other.gameObject.tag == "Bullet")
         {
-
-            foreach(Enemy enemy in FindObjectsOfType<Enemy>())
+            if (gm.GodMode())
             {
-                Destroy(enemy.gameObject);
+                foreach (Enemy enemy in FindObjectsOfType<Enemy>())
+                {
+                    GameObject exp = Instantiate(explosion, enemy.transform.position, enemy.transform.rotation);
+                    Destroy(enemy.gameObject);
+                    Destroy(exp.gameObject, 3.0f);
+                    gm.IncrementScore(loopPoints);
+                }
+            }
+            else
+            {
+                GameObject exp = Instantiate(explosion, transform.position, transform.rotation);
+                Destroy(exp.gameObject, 3.0f);
+                Destroy(gameObject);
                 gm.IncrementScore(loopPoints);
             }
-
-            //Destroy(gameObject);
             Destroy(other.gameObject);
         }
     }

@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour {
     [SerializeField]
     private GameObject lvl1;
 
+    [SerializeField]
+    private bool godMode = false;
+
     private float cooldown = 2.0f;
     private float timeStamp = 0;
     private bool isLevelDone = false;
@@ -133,6 +136,11 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene("MainMenu");
     }
 
-    
+    public bool GodMode()
+    {
+        return godMode;
+    }
+
+
 
 }
