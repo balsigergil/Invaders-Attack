@@ -7,27 +7,36 @@ public class Enemy : MonoBehaviour {
 
     private GameManager gm = null;
 
-    [SerializeField]
-    private int loopPoints;
+    [Header("General")]
+    [SerializeField, Tooltip("How many health it have")]
+    private int health = 1;
 
-    [SerializeField]
-    private float speed = 1f;
+    [SerializeField, Tooltip("How many points per kill")]
+    private int lootPoints = 10;
 
-    [SerializeField]
-    private float shootTimer = 0f;
-    float timer = 0;
+    [SerializeField, Tooltip("Lateral moving speed")]
+    private float movingSpeed = 1.0f;
 
-    [SerializeField]
+    [SerializeField, Tooltip("Explosion prefab to spawn at death")]
     private GameObject explosion;
 
+
+    [Header("Projectiles")]
     [SerializeField]
     private Bullet bulletPrefab;
+
+    [SerializeField]
+    private int bulletSpeed = 5;
+
+    private float shootTimer = 0f;
+    float timer = 0f;
 
     private Vector3 borderRight;
     private Vector3 borderLeft;
     private float newPosY = 0.0f;
 
     private bool hasTouchEdgeOfScreen = false;
+
 
     // Use this for initialization
     void Start()
@@ -44,13 +53,13 @@ public class Enemy : MonoBehaviour {
     { 
         if (transform.position.x >= borderRight.x)
         {
-            speed = -Mathf.Abs(speed);
+            movingSpeed = -Mathf.Abs(movingSpeed);
             hasTouchEdgeOfScreen = true;
         }
 
         if (transform.position.x <= borderLeft.x)
         {
-            speed = Mathf.Abs(speed);
+            movingSpeed = Mathf.Abs(movingSpeed);
             hasTouchEdgeOfScreen = true;
         }
 
@@ -60,7 +69,7 @@ public class Enemy : MonoBehaviour {
             hasTouchEdgeOfScreen = false;
         }
 
-        transform.position = new Vector3(transform.position.x + speed * Time.deltaTime, Mathf.Lerp(transform.position.y, newPosY, 0.06f));
+        transform.position = new Vector3(transform.position.x + movingSpeed * Time.deltaTime, Mathf.Lerp(transform.position.y, newPosY, 0.06f));
 
         timer += Time.deltaTime;
         if (timer >= shootTimer)
@@ -74,7 +83,7 @@ public class Enemy : MonoBehaviour {
     private void Shoot()
     {
         Bullet bullet = Instantiate(bulletPrefab, transform.position, Quaternion.Euler(-90, 0, 0));
-        bullet.SetSpeed(-5);
+        bullet.SetSpeed(-Mathf.Abs(bulletSpeed));
     }
 
     private void OnTriggerEnter(Collider other)
@@ -89,15 +98,20 @@ public class Enemy : MonoBehaviour {
                     GameObject exp = Instantiate(explosion, enemy.transform.position, enemy.transform.rotation);
                     Destroy(enemy.gameObject);
                     Destroy(exp.gameObject, 3.0f);
-                    gm.IncrementScore(loopPoints);
+                    gm.IncrementScore(lootPoints);
                 }
             }
             else
             {
-                GameObject exp = Instantiate(explosion, transform.position, transform.rotation);
-                Destroy(exp.gameObject, 3.0f);
-                Destroy(gameObject);
-                gm.IncrementScore(loopPoints);
+                if (health > 1)
+                    health--;
+                else
+                {
+                    GameObject exp = Instantiate(explosion, transform.position, transform.rotation);
+                    Destroy(exp.gameObject, 3.0f);
+                    Destroy(gameObject);
+                    gm.IncrementScore(lootPoints);
+                }
             }
             Destroy(other.gameObject);
         }

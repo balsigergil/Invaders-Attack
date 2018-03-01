@@ -5,10 +5,16 @@ using UnityEngine;
 public class Shoot : MonoBehaviour {
 
     [SerializeField]
-    private GameObject bulletPrefab;
+    private int health = 3;
+
+    [SerializeField]
+    private Bullet bulletPrefab;
 
     [SerializeField]
     private GameObject bulletSpawn;
+
+    [SerializeField]
+    private int bulletSpeed;
 
     [SerializeField]
     private GameManager gm;
@@ -73,16 +79,25 @@ public class Shoot : MonoBehaviour {
         }
 
         if (i == 0)
-            Instantiate(bulletPrefab, bulletSpawn.transform.position, bulletSpawn.transform.rotation);
+        {
+            Bullet bullet = Instantiate(bulletPrefab, bulletSpawn.transform.position, bulletSpawn.transform.rotation);
+            bullet.SetSpeed(bulletSpeed);
+        }
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag == "EnemyBullet")
         {
-            gm.Loose();
-            Instantiate(explosion, transform.position, transform.rotation);
-            Destroy(gameObject);
+            if (health > 1)
+                health--;
+            else
+            {
+                gm.Loose();
+                Instantiate(explosion, transform.position, transform.rotation);
+                Destroy(gameObject);
+            }
             Destroy(other.gameObject);
         }
     }

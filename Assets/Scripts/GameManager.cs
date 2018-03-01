@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour {
     [SerializeField]
     private GameObject spawnLevel;
     [SerializeField]
-    private GameObject lvl1;
+    private List<GameObject> levels;
 
     [SerializeField]
     private bool godMode = false;
@@ -62,7 +62,6 @@ public class GameManager : MonoBehaviour {
         if (isLevelDone)
         {
             NewLevel(level);
-            Debug.Log("Level:" + level);
         }
     }
 
@@ -78,20 +77,12 @@ public class GameManager : MonoBehaviour {
         // Instantiate the level when the cooldown is done
         if(timeStamp < Time.time)
         {
-            Debug.Log("Cooldown: " + timeStamp);
-            Debug.Log("Current time: " + Time.time);
-            switch (level)
+            if(level-1 < levels.Count)
             {
-                case 1:
-                    Instantiate(lvl1, spawnLevel.transform);
-                    isLevelDone = false;
-                    isCooldownStarted = false;
-                    break;
-                case 2:
-                    Instantiate(lvl1, spawnLevel.transform);
-                    isLevelDone = false;
-                    isCooldownStarted = false;
-                    break;
+                Debug.Log("Level: " + level);
+                Instantiate(levels[level-1], spawnLevel.transform.position, spawnLevel.transform.rotation);
+                isLevelDone = false;
+                isCooldownStarted = false;
             }
         }
     }

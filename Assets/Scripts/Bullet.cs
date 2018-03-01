@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour {
 
-    [SerializeField]
     private float speed = 1f;
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         transform.position = new Vector3(transform.position.x, transform.position.y + speed * Time.deltaTime);
     }
 
