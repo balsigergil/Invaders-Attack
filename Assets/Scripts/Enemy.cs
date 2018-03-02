@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Base class for enemies
+/// </summary>
 public class Enemy : MonoBehaviour {
-
-    private GameManager gm = null;
 
     [Header("General")]
     [SerializeField, Tooltip("How many health it have")]
@@ -32,6 +31,8 @@ public class Enemy : MonoBehaviour {
     [SerializeField]
     private int bulletSpeed = 5;
 
+    private GameManager gm = null;
+
     private float shootTimer = 0f;
     private float shootTimerMin = 1f;
     private float shootTimerMax = 20f;
@@ -39,47 +40,64 @@ public class Enemy : MonoBehaviour {
 
     private Vector3 borderRight;
     private Vector3 borderLeft;
+
+    /// <summary>
+    /// New position in the Y axis
+    /// </summary>
     private float newPosY = 0.0f;
 
     private bool hasTouchEdgeOfScreen = false;
 
 
-    // Use this for initialization
+    // Initialization
     void Start()
     {
+        // Find the game manager in the current scene
         gm = FindObjectOfType<GameManager>();
+
+        // Define the border of the screen based on the user screen resolution
         borderRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, 0, 10));
         borderLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
+
+        // Define the shooting timer
         shootTimer = Random.Range(shootTimerMin, shootTimerMax);
-        newPosY = transform.position.y;
+
+        // Set enemy health at maximum health for the beginning
         health = maxHealth;
+
+        // Hide the health bar at start
         healthSlider.gameObject.SetActive(false);
+
+        newPosY = transform.position.y;
   
     }
 
     // Update is called once per frame
     void Update()
     { 
+        // Check the enemy position compared to the edge of the device screen
         if (transform.position.x >= borderRight.x)
         {
             movingSpeed = -Mathf.Abs(movingSpeed);
             hasTouchEdgeOfScreen = true;
         }
-
         if (transform.position.x <= borderLeft.x)
         {
             movingSpeed = Mathf.Abs(movingSpeed);
             hasTouchEdgeOfScreen = true;
         }
 
+        // Goes one step down if the enemy touched the edge
         if(transform.position.x >= borderLeft.x && transform.position.x <= borderRight.x && hasTouchEdgeOfScreen)
         {
             StepDown();
             hasTouchEdgeOfScreen = false;
         }
 
+        // Update the enemy position
         transform.position = new Vector3(transform.position.x + movingSpeed * Time.deltaTime, Mathf.Lerp(transform.position.y, newPosY, 0.06f));
 
+        // Define a timer and shoot when it's done
         timer += Time.deltaTime;
         if (timer >= shootTimer)
         {
@@ -89,19 +107,30 @@ public class Enemy : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Handles the firing
+    /// </summary>
     private void Shoot()
     {
+        // Creates a new bullet in the scene at the current enemy position
         Bullet bullet = Instantiate(bulletPrefab, transform.position, Quaternion.Euler(-90, 0, 0));
+        // Assigning the bullet velocity always to a negative value so the bullet goes down
         bullet.SetSpeed(-Mathf.Abs(bulletSpeed));
     }
 
-    private void OnTriggerEnter(Collider other)
+    /// <summary>
+    /// When a bullet collides
+    /// </summary>
+    /// <param name="other"></param>
+    private void OnTriggerEnter(Collider collidingBullet)
     {
-
-        if (other.gameObject.tag == "Bullet")
+        // Checks if the bullet is from the player
+        if (collidingBullet.gameObject.tag == "Bullet")
         {
+            // GOD MOD for testing of course :)
             if (gm.GodMode())
             {
+                // Destroys all enemies in one fell swoop
                 foreach (Enemy enemy in FindObjectsOfType<Enemy>())
                 {
                     GameObject exp = Instantiate(explosion, enemy.transform.position, enemy.transform.rotation);
@@ -116,23 +145,38 @@ public class Enemy : MonoBehaviour {
                     health--;
                 else
                 {
+                    // Kill the enemy when it has only one life left, create explosion and increment score
                     GameObject exp = Instantiate(explosion, transform.position, transform.rotation);
                     Destroy(exp.gameObject, 3.0f);
                     Destroy(gameObject);
                     gm.IncrementScore(lootPoints);
                 }
             }
+
+            // Shows the enemy's health bar only when it takes damage
             if (!healthSlider.gameObject.activeInHierarchy)
                 healthSlider.gameObject.SetActive(true);
+
+            // Sets health bar value between 0 to 1
             healthSlider.value = (float)health / maxHealth;
-            Destroy(other.gameObject);
+
+            // Destroys the bullet
+            Destroy(collidingBullet.gameObject);
         }
     }
 
+    /// <summary>
+    /// Update the new position in Y axis
+    /// </summary>
     private void StepDown()
     {
         newPosY = transform.position.y - 0.8f;
     }
+
+
+    /************************************************************************/
+    /* Getters and setters                                                  */
+    /************************************************************************/
 
     public void SetMovingSpeed(float speed)
     {

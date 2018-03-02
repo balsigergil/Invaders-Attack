@@ -1,10 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour {
+/// <summary>
+/// Manager the game logic, levels and score
+/// </summary>
+public class GameManager : MonoBehaviour
+{
 
     private int level = 1;
     private int score = 0;
@@ -19,12 +22,13 @@ public class GameManager : MonoBehaviour {
     private LevelGeneration levelgen = null;
 
     [Header("Levels")]
+
     [SerializeField]
     private GameObject spawnLevel;
 
     [SerializeField]
     private List<Enemy> enemies;
-        
+
     [SerializeField]
     private bool godMode = false;
 
@@ -40,15 +44,17 @@ public class GameManager : MonoBehaviour {
     private Text levelText;
 
     [SerializeField]
+    private Text healthText;
+
+    [SerializeField]
     private Button retryBtn;
 
     [SerializeField]
     private Button mainMenuBtn;
 
-    [SerializeField]
-    private Text healthText;
-
-    void Start () {
+    // Initialization
+    void Start()
+    {
         scoreText.text = score.ToString();
         finalText.text = "";
         retryBtn.gameObject.SetActive(false);
@@ -58,47 +64,48 @@ public class GameManager : MonoBehaviour {
         levelText.text = "Niveau: " + level;
     }
 
+    // Update is called once per frame
     private void Update()
     {
+        // Handle the pause and resume feature
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
             {
-                Time.timeScale = 1;
-                mainMenuBtn.gameObject.SetActive(false);
+                Time.timeScale = 1;                         // Restart the time
+                mainMenuBtn.gameObject.SetActive(false);    // Hide the main menu button
                 isPaused = false;
             }
             else
             {
-                Time.timeScale = 0;
-                mainMenuBtn.gameObject.SetActive(true);
+                Time.timeScale = 0;                         // Stop the time
+                mainMenuBtn.gameObject.SetActive(true);     // Show the main menu button
                 isPaused = true;
             }
         }
 
-        int i = 0;
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
-        {
-            i++;
-        }
-
-        if (i == 0)
+        // Marks the level as "done" when there isn't any enemy left in the scene
+        if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
         {
             isLevelDone = true;
         }
 
-        if(isLevelDone && !isCooldownStarted)
-        {
-            level++;
-            levelText.text = "Niveau: " + level;
-        }
-
         if (isLevelDone)
         {
+            if (!isCooldownStarted)
+            {
+                level++;
+                levelText.text = "Niveau: " + level;
+            }
+
             NewLevel(level);
         }
     }
 
+    /// <summary>
+    /// Handles the creation of a new level
+    /// </summary>
+    /// <param name="level"></param>
     private void NewLevel(int level)
     {
         // Start the cooldown between levels if it isn't already started
@@ -109,7 +116,7 @@ public class GameManager : MonoBehaviour {
         }
 
         // Instantiate the level when the cooldown is done
-        if(timeStamp < Time.time)
+        if (timeStamp < Time.time)
         {
             levelgen.Generate(level);
             isLevelDone = false;
@@ -117,18 +124,24 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void Loose()
-    {
-        retryBtn.gameObject.SetActive(true);
-        mainMenuBtn.gameObject.SetActive(true);
-        SetFinalText("Perdu !");
-    }
-
+    /// <summary>
+    /// Update the UI to winning states
+    /// </summary>
     public void Win()
     {
         retryBtn.gameObject.SetActive(true);
         mainMenuBtn.gameObject.SetActive(true);
         SetFinalText("Gagné !");
+    }
+
+    /// <summary>
+    /// Update the UI to loosing states
+    /// </summary>
+    public void Loose()
+    {
+        retryBtn.gameObject.SetActive(true);
+        mainMenuBtn.gameObject.SetActive(true);
+        SetFinalText("Perdu !");
     }
 
     public void IncrementScore(int loopPoints)
@@ -146,6 +159,11 @@ public class GameManager : MonoBehaviour {
     {
         SceneManager.LoadScene("MainMenu");
     }
+
+
+    /************************************************************************/
+    /* Getters and setters                                                  */
+    /************************************************************************/
 
     public bool GodMode()
     {
@@ -165,6 +183,11 @@ public class GameManager : MonoBehaviour {
     public void SetHealthText(string text)
     {
         healthText.text = text;
+    }
+
+    public bool GetIsPaused()
+    {
+        return isPaused;
     }
 
 }
