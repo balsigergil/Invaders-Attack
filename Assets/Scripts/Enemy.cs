@@ -9,7 +9,8 @@ public class Enemy : MonoBehaviour {
 
     [Header("General")]
     [SerializeField, Tooltip("How many health it have")]
-    private int health = 1;
+    private int maxHealth = 1;
+    private int health = 0;
 
     [SerializeField, Tooltip("How many points per kill")]
     private int lootPoints = 10;
@@ -20,6 +21,9 @@ public class Enemy : MonoBehaviour {
     [SerializeField, Tooltip("Explosion prefab to spawn at death")]
     private GameObject explosion;
 
+    [SerializeField]
+    private Slider healthSlider;
+
 
     [Header("Projectiles")]
     [SerializeField]
@@ -29,6 +33,8 @@ public class Enemy : MonoBehaviour {
     private int bulletSpeed = 5;
 
     private float shootTimer = 0f;
+    private float shootTimerMin = 1f;
+    private float shootTimerMax = 20f;
     float timer = 0f;
 
     private Vector3 borderRight;
@@ -44,8 +50,11 @@ public class Enemy : MonoBehaviour {
         gm = FindObjectOfType<GameManager>();
         borderRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, 0, 10));
         borderLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 10));
-        shootTimer = Random.Range(2.0f, 20.0f);
+        shootTimer = Random.Range(shootTimerMin, shootTimerMax);
         newPosY = transform.position.y;
+        health = maxHealth;
+        healthSlider.gameObject.SetActive(false);
+  
     }
 
     // Update is called once per frame
@@ -75,7 +84,7 @@ public class Enemy : MonoBehaviour {
         if (timer >= shootTimer)
         {
             timer = 0;
-            shootTimer = Random.Range(2.0f, 20.0f);
+            shootTimer = Random.Range(shootTimerMin, shootTimerMax);
             Shoot();
         }
     }
@@ -113,13 +122,27 @@ public class Enemy : MonoBehaviour {
                     gm.IncrementScore(lootPoints);
                 }
             }
+            if (!healthSlider.gameObject.activeInHierarchy)
+                healthSlider.gameObject.SetActive(true);
+            healthSlider.value = (float)health / maxHealth;
             Destroy(other.gameObject);
         }
     }
 
     private void StepDown()
     {
-        newPosY = transform.position.y - 0.7f;
+        newPosY = transform.position.y - 0.8f;
+    }
+
+    public void SetMovingSpeed(float speed)
+    {
+        movingSpeed = speed;
+    }
+
+    public void SetShootTimerRange(float shootTimerMin, float shootTimerMax)
+    {
+        this.shootTimerMin = shootTimerMin;
+        this.shootTimerMax = shootTimerMax;
     }
 
 }

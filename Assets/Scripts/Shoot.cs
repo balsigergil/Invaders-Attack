@@ -21,9 +21,14 @@ public class Shoot : MonoBehaviour {
 
     [SerializeField]
     private GameObject explosion;
-	
-	// Update is called once per frame
-	void Update () {
+
+    private void Start()
+    {
+        gm.SetHealthText(health.ToString());
+    }
+
+    // Update is called once per frame
+    void Update () {
 
         // For Android
         if(Application.platform == RuntimePlatform.Android)
@@ -90,14 +95,14 @@ public class Shoot : MonoBehaviour {
     {
         if(other.gameObject.tag == "EnemyBullet")
         {
-            if (health > 1)
-                health--;
-            else
+            if (health == 1)
             {
                 gm.Loose();
                 Instantiate(explosion, transform.position, transform.rotation);
                 Destroy(gameObject);
             }
+            health--;
+            gm.SetHealthText(health.ToString());
             Destroy(other.gameObject);
         }
     }
